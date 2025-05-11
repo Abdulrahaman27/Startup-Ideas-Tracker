@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using startupIdeasTracker;
 
@@ -17,18 +18,16 @@ namespace startupIdeasTracker
 
             while (true)
             {
-                Console.WriteLine("\nStartup Ideas Tracker");
-                Console.WriteLine("1. Add Ideas");
-                Console.WriteLine("2. View All Ideas");
-                Console.WriteLine("3. Save & Exit");
-                Console.WriteLine("Choose an option: ");
+                Console.Clear();
+                DisplayMenu();
 
                 var choice = Console.ReadLine();
                 switch (choice)
                 {
                     case "1": AddIdea(); break;
                     case "2": ViewIdeas(); break;
-                    case "3": SaveIdeas(); return;
+                    case "3": SearchIdeas(); break;
+                    case "4": SaveIdeas(); return;
                     default: Console.WriteLine("Invalid choice."); break;
                 }
 
@@ -37,6 +36,22 @@ namespace startupIdeasTracker
 
 
         // Functions
+
+        // Display menu
+
+        static void DisplayMenu()
+        {
+            Console.WriteLine("🌟 Startup Ideas Tracker 🌟");
+            Console.WriteLine($"📊 Total Ideas: {ideas.Count}");
+            Console.WriteLine("1. Add New Idea");
+            Console.WriteLine("2. View All Ideas");
+            Console.WriteLine("3. Search Ideas");
+            Console.WriteLine("4. Edit Idea");
+            Console.WriteLine("5. Delete Idea");
+            Console.WriteLine("6. Save & Exit");
+            Console.WriteLine("Choose an option: ");
+        }
+
         static void AddIdea()
         {
             var idea = new StartupIdea();
@@ -82,6 +97,33 @@ namespace startupIdeasTracker
             }
         }
 
+        static void SearchIdeas()
+        {
+            Console.Clear();
+            Console.WriteLine("🔍 Search Ideas");
+            Console.Write("Enter search term: ");
+            var term = Console.ReadLine()?.ToLower(); 
+
+            var results = ideas.Where(i => i.Name.ToLower().Contains(term) || i.Problem.ToLower().Contains(term) || i.Solution.ToLower().Contains(term)).ToList();
+
+            if(results.Count == 0)
+            {
+                Console.WriteLine("\nNo matching ideas found.");
+            }else
+            {
+                Console.WriteLine($"\nFound {results.Count} matching ideas:");
+                foreach (var result in results)
+                {
+                    Console.WriteLine($"{result.Id}:  {result.Name} ({result.Status})");
+                }
+            }
+
+            Console.WriteLine("\nPress any key to continue...");
+            Console.ReadKey();
+        }
+
+
+        // Save Ideas Function
         static void SaveIdeas()
         {
             var json = JsonSerializer.Serialize(ideas, new JsonSerializerOptions { WriteIndented = true });
