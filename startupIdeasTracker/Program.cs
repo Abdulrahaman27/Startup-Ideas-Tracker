@@ -218,10 +218,17 @@ namespace startupIdeasTracker
             // Save Ideas Function
             static void SaveIdeas()
             {
-                var json = JsonSerializer.Serialize(ideas, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(filePath, json);
-                Console.WriteLine("🗃️ Idea Saved");
+                try
+                {
+                    var json = JsonSerializer.Serialize(ideas, new JsonSerializerOptions { WriteIndented = true });
+                    File.WriteAllText(filePath, json);
+                    Console.WriteLine("🗃️ Idea Saved Successfully!");
+                } catch (Exception ex) {
+                    Console.WriteLine($"❌ Error saving ideas: {ex.Message}");
+                    }
             }
+
+            // Load Ideas Function
 
             static void LoadIdeas()
             {
