@@ -28,7 +28,8 @@ namespace startupIdeasTracker
                     case "2": ViewIdeas(); break;
                     case "3": SearchIdeas(); break;
                     case "4": EditIdea(); break;
-                    case "5": SaveIdeas(); return;
+                    case "5": DeleteIdea(); break;
+                    case "6": SaveIdeas(); return;
                     default: Console.WriteLine("Invalid choice."); break;
                 }
 
@@ -165,6 +166,50 @@ namespace startupIdeasTracker
                 Console.WriteLine("Invalid ID!");
             }
 
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+        }
+
+
+
+        // Delete Idea
+        static void DeleteIdea()
+        {
+            Console.Clear();
+            if (ideas.Count == 0)
+            {
+                Console.WriteLine("No idea available to delete.");
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
+                return;
+            }
+
+            ViewIdeas();
+            Console.WriteLine("\nEnter ID of idea to delete: ");
+            if(int.TryParse(Console.ReadLine(), out int id))
+            {
+                var idea = ideas.FirstOrDefault(i => i.Id == id);
+                if (idea != null)
+                {
+                    Console.WriteLine($"Are you sure you want to delete '{idea.Name}'? (y/n)");
+                    if(Console.ReadLine().ToLower() == "y")
+                    {
+                        ideas.Remove(idea);
+                        Console.WriteLine("🗑️ Idea deleted successfully!");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Deletion Cancelled");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Idea not found!");
+                }
+            }else
+            {
+                Console.WriteLine("Invalid ID!");
+            }
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
         }
