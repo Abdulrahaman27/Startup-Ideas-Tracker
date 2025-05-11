@@ -27,7 +27,8 @@ namespace startupIdeasTracker
                     case "1": AddIdea(); break;
                     case "2": ViewIdeas(); break;
                     case "3": SearchIdeas(); break;
-                    case "4": SaveIdeas(); return;
+                    case "4": EditIdea(); break;
+                    case "5": SaveIdeas(); return;
                     default: Console.WriteLine("Invalid choice."); break;
                 }
 
@@ -97,19 +98,22 @@ namespace startupIdeasTracker
             }
         }
 
+
+        // Search Idea
         static void SearchIdeas()
         {
             Console.Clear();
             Console.WriteLine("🔍 Search Ideas");
             Console.Write("Enter search term: ");
-            var term = Console.ReadLine()?.ToLower(); 
+            var term = Console.ReadLine()?.ToLower();
 
             var results = ideas.Where(i => i.Name.ToLower().Contains(term) || i.Problem.ToLower().Contains(term) || i.Solution.ToLower().Contains(term)).ToList();
 
-            if(results.Count == 0)
+            if (results.Count == 0)
             {
                 Console.WriteLine("\nNo matching ideas found.");
-            }else
+            }
+            else
             {
                 Console.WriteLine($"\nFound {results.Count} matching ideas:");
                 foreach (var result in results)
@@ -122,23 +126,86 @@ namespace startupIdeasTracker
             Console.ReadKey();
         }
 
-
-        // Save Ideas Function
-        static void SaveIdeas()
+        // Edit Idea
+        static void EditIdea()
         {
-            var json = JsonSerializer.Serialize(ideas, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(filePath, json);
-            Console.WriteLine("🗃️ Idea Saved");
-        }
-
-        static void LoadIdeas()
-        {
-            if (File.Exists(filePath))
+            Console.Clear();
+            if (ideas.Count == 0)
             {
-                var json = File.ReadAllText(filePath);
-                ideas = JsonSerializer.Deserialize<List<StartupIdea>>(json) ?? new List<StartupIdea>();
-                Console.WriteLine("📂 Ideas loaded.");
+                Console.WriteLine("No ideas available to edit");
+                Console.WriteLine("Press any  key to continue...");
+                Console.ReadKey();
+                return;
             }
+
+            ViewIdeas();
+            Console.WriteLine("\nEnter ID of idea to edit: ");
+            if (int.TryParse(Console.ReadLine(), out int id))
+            {
+                var idea = ideas.FirstOrDefault(i => i.Id == id);
+                if (idea != null)
+                {
+                    Console.Clear();
+                    Console.WriteLine($"✏️ Editing: {idea.Name}\n");
+                    idea.Name = GetValidInput($"Name [{idea.Name}]: ", required : false) ?? idea.Name;
+                    idea.Problem = GetValidInput($"problem [{idea.Problem}]: ", required: false) ?? idea.Problem;
+                    idea.TargetMarket = GetValidInput($"Target Market [{idea.TargetMarket}]: ", required: false) ?? idea.TargetMarket;
+                    idea.Solution = GetValidInput($"Solution [{idea.Solution}]: ", required: false) ?? idea.Solution;
+                    idea.Status = GetValidInput($"Status [{idea.Status}]: ", required: false) ?? idea.Status;
+                    idea.NextSteps = GetValidInput($"Next Step [{idea.NextSteps}]: ", required: false) ?? idea.NextSteps;
+                    idea.LastUpdated = DateTime.Now;
+                    Console.WriteLine("\n✅ Idea updated successfully!");
+                }else
+                {
+                    Console.WriteLine("Idea not found!");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid ID!");
+            }
+
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
         }
+
+
+            // Save Ideas Function
+            static void SaveIdeas()
+            {
+                var json = JsonSerializer.Serialize(ideas, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(filePath, json);
+                Console.WriteLine("🗃️ Idea Saved");
+            }
+
+            static void LoadIdeas()
+            {
+                if (File.Exists(filePath))
+                {
+                    var json = File.ReadAllText(filePath);
+                    ideas = JsonSerializer.Deserialize<List<StartupIdea>>(json) ?? new List<StartupIdea>();
+                    Console.WriteLine("📂 Ideas loaded.");
+                }
+            }
+
+            #region Helper Methods
+            static string GetValidInput(string prompt, bool required = false)
+            {
+                string input;
+                do
+                {
+                    Console.WriteLine(prompt);
+                    input = Console.ReadLine()?.Trim();
+
+                    if (!required) return input;
+
+                    if (string.IsNullOrEmpty(input))
+                    {
+                        Console.WriteLine("This field is required, Please try again.");
+                    }
+
+                } while (required && string.IsNullOrEmpty(input));
+                return input;
+            }
     }
 }
